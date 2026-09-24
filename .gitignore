@@ -8,6 +8,8 @@ backend/.env
 __pycache__/
 *.py[cod]
 .pytest_cache/
+dist/
+build/
 .coverage
 htmlcov/
 

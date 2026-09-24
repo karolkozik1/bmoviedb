@@ -1,3 +1,3 @@
-from app.models import Movie
+from app.models.movie import Movie
 
 __all__ = ["Movie"]
