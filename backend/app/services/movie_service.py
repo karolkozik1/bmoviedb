@@ -9,7 +9,7 @@ def create_movie(db: Session, movie_create: MovieCreate) -> Movie:
         title=movie_create.title,
         original_title=movie_create.original_title,
         description=movie_create.description,
-        release_year=movie_create.year,
+        release_year=movie_create.release_year,
         release_date=movie_create.release_date,
         duration_minutes=movie_create.duration_minutes,
         rating=movie_create.rating

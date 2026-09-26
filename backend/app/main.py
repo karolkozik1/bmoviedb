@@ -2,12 +2,15 @@ from fastapi import FastAPI
 from sqlalchemy import text
 
 from app.db.session import engine
+from app.api.routers.movies import router as movies_router
 
 app = FastAPI(
     title="BmovieDb API",
     description="Backend API for BmovieDb",
     version="0.1.0",
 )
+
+app.include_router(movies_router)
 
 @app.get("/")
 async def root():

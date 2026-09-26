@@ -15,5 +15,6 @@ class Movie(Base):
     release_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=True)
     duration_minutes: Mapped[int] = mapped_column(Integer, nullable=True)
+    rating: Mapped[float] = mapped_column(nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

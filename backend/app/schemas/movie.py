@@ -7,7 +7,7 @@ class MovieBase(BaseModel):
     title: str
     original_title: str | None = None
     description: str | None = None
-    year: int
+    release_year: int
     release_date: datetime | None = None
     duration_minutes: int | None = None
     rating: float | None = None
