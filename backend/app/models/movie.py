@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import DateTime, Integer, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
@@ -18,3 +18,4 @@ class Movie(Base):
     rating: Mapped[float] = mapped_column(nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    genres = relationship("Genre", secondary="movie_genres", back_populates="movies")

@@ -11,7 +11,10 @@ router = APIRouter(prefix="/movies", tags=["movies"])
 @router.post("", response_model=MovieRead, status_code=status.HTTP_201_CREATED)
 
 def create_movie(movie_data: MovieCreate, db: Session = Depends(get_db)):
-    return movie_service.create_movie(db=db, movie_create=movie_data)
+    try:
+        return movie_service.create_movie(db=db, movie_create=movie_data)
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
 
 ##Get a list of movies
 @router.get("", response_model=list[MovieRead])
