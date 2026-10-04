@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -18,10 +19,17 @@ class MovieBase(BaseModel):
 class MovieCreate(MovieBase):
     genre_ids: list[int] | None = Field(default_factory=list)
 
+class MovieExternalIdRead(BaseModel):
+    provider: Literal["tmdb", "imdb"]
+    external_id: str
+
+    model_config = ConfigDict(from_attributes=True)
+
 class MovieRead(MovieBase):
     id: int
     created_at: datetime
     updated_at: datetime
     genres: list[GenreRead] = Field(default_factory=list)
+    external_ids: list[MovieExternalIdRead] = Field(default_factory=list)
     
     model_config = ConfigDict(from_attributes=True)

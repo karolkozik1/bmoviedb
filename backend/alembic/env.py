@@ -10,6 +10,7 @@ from app.db.base import Base
 from app.models.movie import Movie
 from app.models.genre import Genre
 from app.models.movie_genre import Movie_Genre
+from app.models.movie_external_id import MovieExternalId
 
 
 

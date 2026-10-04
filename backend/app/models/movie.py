@@ -19,3 +19,8 @@ class Movie(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     genres = relationship("Genre", secondary="movie_genres", back_populates="movies")
+    external_ids = relationship(
+        "MovieExternalId",
+        back_populates="movie",
+        cascade="all, delete-orphan",
+    )
