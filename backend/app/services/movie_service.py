@@ -1,10 +1,10 @@
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.genre import Genre
 from app.models.movie import Movie
 from app.models.movie_external_id import MovieExternalId
-from app.schemas.movie import MovieCreate
+from app.schemas.movie import MovieCreate, MovieUpdate
 
 def create_movie(db: Session, movie_create: MovieCreate) -> Movie:
     genre_ids = movie_create.genre_ids or []
@@ -39,18 +39,54 @@ def get_movies(db: Session,
                release_year: int | None = None, 
                genre_id: int | None = None,
                skip: int = 0,
-               limit: int = 30) -> list[Movie]:
+               limit: int = 30,
+               sort_by: str = "title") -> list[Movie]:
     statement = select(Movie).options(
         selectinload(Movie.genres), selectinload(Movie.external_ids)
-    ).order_by(Movie.id)
+    )
+    if sort_by == "release_year":
+        statement = statement.order_by(Movie.release_year)
+    elif sort_by == "newest":
+        statement = statement.order_by(Movie.release_date.desc())
+    elif sort_by == "oldest":
+        statement = statement.order_by(Movie.release_date.asc())
+    else:
+        statement = statement.order_by(Movie.title)
     if title:
-        statement = statement.where(Movie.title.ilike(f"%{title}%"))
+        statement = statement.where(
+            or_(Movie.title.ilike(f"%{title}%"), 
+                Movie.original_title.ilike(f"%{title}%")))
     if release_year:
         statement = statement.where(Movie.release_year == release_year)
     if genre_id:
         statement = statement.join(Movie.genres).where(Genre.id == genre_id)
     statement = statement.offset(skip).limit(limit)
     return list(db.scalars(statement).unique().all())
+
+def update_movie(db: Session, movie: Movie, movie_update: MovieUpdate) -> Movie:
+    update_data = movie_update.model_dump(exclude_unset=True)
+    genre_ids = update_data.pop("genre_ids", None)
+    
+    for field, value in update_data.items():
+        setattr(movie, field, value)
+    
+    if genre_ids is not None:
+        unique_genre_ids = set(genre_ids)
+        genres = get_genres_by_ids(db, list(unique_genre_ids))
+        found_genre_ids = {genre.id for genre in genres}
+        missing_genre_ids = unique_genre_ids - found_genre_ids
+        if len(genres) != len(unique_genre_ids):
+            raise ValueError(f"Duplicate genre IDs: {sorted(unique_genre_ids - {genre.id for genre in genres})}")
+        if missing_genre_ids:
+            raise ValueError(f"Unknown genre IDs: {sorted(missing_genre_ids)}")
+        movie.genres = genres
+    db.commit()
+    db.refresh(movie)
+    return movie
+
+def delete_movie(db: Session, movie: Movie) -> None:
+    db.delete(movie)
+    db.commit()
 
 def get_movie_by_id(db: Session, movie_id: int) -> Movie | None:
     statement = select(Movie).options(
