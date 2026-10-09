@@ -5,6 +5,8 @@ from app.models.genre import Genre
 from app.models.movie import Movie
 from app.models.movie_external_id import MovieExternalId
 from app.schemas.movie import MovieCreate, MovieUpdate
+from app.models.movie_person import MoviePerson
+from app.models.person import Person
 
 def create_movie(db: Session, movie_create: MovieCreate) -> Movie:
     genre_ids = movie_create.genre_ids or []
@@ -150,3 +152,14 @@ def get_genres_by_ids(db: Session, genre_ids: list[int]) -> list[Genre]:
         return []
     statement = select(Genre).where(Genre.id.in_(genre_ids))
     return list(db.scalars(statement).all())
+
+def add_person_to_movie(db: Session, movie: Movie, person_id: int, role: str) -> MoviePerson:
+    person = db.get(Person, person_id)
+    if person is None:
+        raise ValueError(f"Person with ID {person_id} does not exist")
+    
+    movie_person = MoviePerson(movie_id=movie.id, person_id=person.id, role=role)
+    db.add(movie_person)
+    db.commit()
+    db.refresh(movie_person)
+    return movie_person

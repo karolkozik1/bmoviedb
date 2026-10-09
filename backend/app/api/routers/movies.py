@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.schemas.movie import MovieCreate, MovieRead, MovieUpdate
+from app.schemas.person import MoviePersonCreate
 from app.services import movie_service
 
 router = APIRouter(prefix="/movies", tags=["movies"])
@@ -53,3 +54,13 @@ def delete_movie(movie_id: int, db: Session = Depends(get_db)):
     if movie is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
     movie_service.delete_movie(db=db, movie=movie)
+
+@router.post("/{movie_id}/people", response_model=MoviePersonCreate, status_code=status.HTTP_201_CREATED)
+def add_person_to_movie(movie_id: int, person_data: MoviePersonCreate, db: Session = Depends(get_db)):
+    movie = movie_service.get_movie_by_id(db=db, movie_id=movie_id)
+    if not movie:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
+    try:
+        return movie_service.add_person_to_movie(db=db, movie=movie, person_id=person_data.person_id, role=person_data.role)
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
