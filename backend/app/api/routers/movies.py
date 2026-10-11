@@ -64,3 +64,13 @@ def add_person_to_movie(movie_id: int, person_data: MoviePersonCreate, db: Sessi
         return movie_service.add_person_to_movie(db=db, movie=movie, person_id=person_data.person_id, role=person_data.role)
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+    
+@router.delete("/{movie_id}/people/{person_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_person_from_movie(movie_id: int, person_id: int, role: str, db: Session = Depends(get_db)):
+    movie = movie_service.get_movie_by_id(db=db, movie_id=movie_id)
+    if movie is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
+    removed = movie_service.remove_person_from_movie(db=db, movie=movie, person_id=person_id, role=role)
+    if not removed:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie person relation not found")
+    

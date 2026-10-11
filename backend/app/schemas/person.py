@@ -29,7 +29,7 @@ class PersonRead(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    
+class PersonUpdate(BaseModel):
     
 class MoviePersonCreate(BaseModel):
     person_id: int

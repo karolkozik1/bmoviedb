@@ -15,4 +15,4 @@ class Person(Base):
     death_date: Mapped[date] = mapped_column(Date, nullable=True)
     biography: Mapped[str] = mapped_column(Text, nullable=True)
 
-    movie_roles = relationship("MoviePerson", back_populates="persons", cascade="all, delete-orphan")
+    movie_roles = relationship("MoviePerson", back_populates="person", cascade="all, delete-orphan")
