@@ -30,7 +30,12 @@ class PersonRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class PersonUpdate(BaseModel):
-    
+    first_name: str | None = Field(default=None, min_length=2, max_length=100)
+    last_name: str | None = Field(default=None, min_length=2, max_length=100)
+    birth_date: date | None = None
+    death_date: date | None = None
+    biography: str | None = None
+
 class MoviePersonCreate(BaseModel):
     person_id: int
     role: str = Field(min_length=2, max_length=50)
