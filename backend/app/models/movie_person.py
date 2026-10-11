@@ -12,4 +12,4 @@ class MoviePerson(Base):
     role: Mapped[str] = mapped_column(String(50), nullable=False)
 
     movie = relationship("Movie", back_populates="people_roles")
-    persons = relationship("Person", back_populates="movie_roles")
+    person = relationship("Person", back_populates="movie_roles")

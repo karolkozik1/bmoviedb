@@ -44,7 +44,9 @@ def get_movies(db: Session,
                limit: int = 30,
                sort_by: str = "title") -> list[Movie]:
     statement = select(Movie).options(
-        selectinload(Movie.genres), selectinload(Movie.external_ids)
+        selectinload(Movie.genres),
+        selectinload(Movie.people_roles).selectinload(MoviePerson.person),
+        selectinload(Movie.external_ids)
     )
     if sort_by == "release_year":
         statement = statement.order_by(Movie.release_year)
@@ -92,7 +94,9 @@ def delete_movie(db: Session, movie: Movie) -> None:
 
 def get_movie_by_id(db: Session, movie_id: int) -> Movie | None:
     statement = select(Movie).options(
-        selectinload(Movie.genres), selectinload(Movie.external_ids)
+        selectinload(Movie.genres),
+        selectinload(Movie.people_roles).selectinload(MoviePerson.person),
+        selectinload(Movie.external_ids)
     ).where(Movie.id == movie_id)
     return db.scalars(statement).first()
 
@@ -163,3 +167,16 @@ def add_person_to_movie(db: Session, movie: Movie, person_id: int, role: str) ->
     db.commit()
     db.refresh(movie_person)
     return movie_person
+
+def remove_person_from_movie(db: Session, movie: Movie, person_id: int, role: str) -> bool:
+    statement = select(MoviePerson).where(
+        MoviePerson.movie_id == movie.id,
+        MoviePerson.person_id == person_id,
+        MoviePerson.role == role)
+    relation = db.scalars(statement).first()
+    if relation is None:
+        return False
+    
+    db.delete(relation)
+    db.commit()
+    return True

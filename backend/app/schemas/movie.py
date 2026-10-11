@@ -4,7 +4,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.genre import GenreRead
-
+from app.schemas.person import MoviePersonRead
 
 class MovieBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -30,6 +30,7 @@ class MovieRead(MovieBase):
     created_at: datetime
     updated_at: datetime
     genres: list[GenreRead] = Field(default_factory=list)
+    people_roles: list[MoviePersonRead] = Field(default_factory=list)
     external_ids: list[MovieExternalIdRead] = Field(default_factory=list)
     
     model_config = ConfigDict(from_attributes=True)
