@@ -29,3 +29,10 @@ def update_person(person_id: int, person_data: PersonUpdate, db: Session = Depen
     if person is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Person not found")
     return person_service.update_person(db, person, person_data)
+
+@router.delete("/{person_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_person(person_id: int, db: Session = Depends(get_db)):
+    person = person_service.get_person_by_id(db, person_id)
+    if person is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Person not found")
+    person_service.delete_person(db, person)

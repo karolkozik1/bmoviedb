@@ -30,3 +30,7 @@ def update_person(db: Session, person: Person, person_data: PersonUpdate) -> Per
     db.commit()
     db.refresh(person)
     return person
+
+def delete_person(db: Session, person: Person) -> None:
+    db.delete(person)
+    db.commit()
