@@ -40,6 +40,8 @@ def get_movies(db: Session,
                title: str | None = None, 
                release_year: int | None = None, 
                genre_id: int | None = None,
+               person_id: int | None = None,
+               role: str | None = None,
                skip: int = 0,
                limit: int = 30,
                sort_by: str = "title") -> list[Movie]:
@@ -64,6 +66,12 @@ def get_movies(db: Session,
         statement = statement.where(Movie.release_year == release_year)
     if genre_id:
         statement = statement.join(Movie.genres).where(Genre.id == genre_id)
+    if person_id is not None or role is not None:
+        statement = statement.join(Movie.people_roles)
+    if person_id is not None:
+        statement = statement.where(MoviePerson.person_id == person_id)
+    if role is not None:
+        statement = statement.where(MoviePerson.role == role)
     statement = statement.offset(skip).limit(limit)
     return list(db.scalars(statement).unique().all())
 

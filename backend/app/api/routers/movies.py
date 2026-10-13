@@ -23,11 +23,13 @@ def create_movie(movie_data: MovieCreate, db: Session = Depends(get_db)):
 def get_movies(title: str | None = Query(default=None, min_length=2, max_length=200), 
                release_year: int | None = Query(default=None, ge=1800, le=2100),
                genre_id: int | None = Query(default=None, gt=0),
+               person_id: int | None = Query(default=None, gt=0),
+               role: str | None = Query(default=None, min_length=2, max_length=50),
                skip: int = Query(default=0, ge=0),
                limit: int = Query(default=30, ge=1, le=100), 
                sort_by: str = Query(default="title", pattern="^(title|release_year|newest|oldest)$"),
                db: Session = Depends(get_db)):
-    return movie_service.get_movies(db, title=title, release_year=release_year, genre_id=genre_id, skip=skip, limit=limit, sort_by=sort_by)
+    return movie_service.get_movies(db, title=title, release_year=release_year, genre_id=genre_id, person_id=person_id, role=role, skip=skip, limit=limit, sort_by=sort_by)
 
 ##Get a movie by ID
 @router.get("/{movie_id}", response_model=MovieRead)
