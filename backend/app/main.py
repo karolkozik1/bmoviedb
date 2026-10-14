@@ -5,6 +5,7 @@ from app.db.session import engine
 from app.api.routers.movies import router as movies_router
 from app.api.routers.genres import router as genres_router
 from app.api.routers.people import router as people_router
+from app.api.routers.auth import router as auth_router
 
 app = FastAPI(
     title="BmovieDb API",
@@ -15,7 +16,7 @@ app = FastAPI(
 app.include_router(movies_router)
 app.include_router(genres_router)
 app.include_router(people_router)
-
+app.include_router(auth_router)
 @app.get("/")
 async def root():
     return {"message": "BMovieDb API is running"
