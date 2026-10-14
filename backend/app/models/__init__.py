@@ -4,5 +4,6 @@ from app.models.movie_genre import Movie_Genre
 from app.models.person import Person
 from app.models.movie_person import MoviePerson
 from app.models.movie_external_id import MovieExternalId
+from app.models.user import User
 
-__all__ = ["Movie", "Genre", "Movie_Genre", "Person", "MoviePerson", "MovieExternalId"]
+__all__ = ["Movie", "Genre", "Movie_Genre", "Person", "MoviePerson", "MovieExternalId", "User"]
