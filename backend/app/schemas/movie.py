@@ -15,6 +15,7 @@ class MovieBase(BaseModel):
     release_date: datetime | None = None
     duration_minutes: int | None = Field(default=None, gt=0, le=1000)
     rating: float | None = None
+    is_active: bool = Field(default=True)
     
 class MovieCreate(MovieBase):
     genre_ids: list[int] | None = Field(default_factory=list)

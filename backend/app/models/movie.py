@@ -21,3 +21,4 @@ class Movie(Base):
     people_roles = relationship("MoviePerson", back_populates="movie", cascade="all, delete-orphan")
     genres = relationship("Genre", secondary="movie_genres", back_populates="movies")
     external_ids = relationship("MovieExternalId", back_populates="movie", cascade="all, delete-orphan")
+    is_active: Mapped[bool] = mapped_column(nullable=False, default=True)

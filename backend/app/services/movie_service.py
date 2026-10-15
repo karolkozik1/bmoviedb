@@ -25,7 +25,8 @@ def create_movie(db: Session, movie_create: MovieCreate) -> Movie:
         release_date=movie_create.release_date,
         duration_minutes=movie_create.duration_minutes,
         genres=genres,
-        rating=movie_create.rating
+        rating=movie_create.rating,
+        is_active=movie_create.is_active
     )
     
     db.add(movie)
@@ -42,6 +43,7 @@ def get_movies(db: Session,
                genre_id: int | None = None,
                person_id: int | None = None,
                role: str | None = None,
+               is_active: bool | None = None,
                skip: int = 0,
                limit: int = 30,
                sort_by: str = "title") -> list[Movie]:
@@ -72,6 +74,8 @@ def get_movies(db: Session,
         statement = statement.where(MoviePerson.person_id == person_id)
     if role is not None:
         statement = statement.where(MoviePerson.role == role)
+    if is_active is not None:
+        statement = statement.where(Movie.is_active == is_active)
     statement = statement.offset(skip).limit(limit)
     return list(db.scalars(statement).unique().all())
 
