@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.schemas.user import UserCreate, UserRead
+from app.core.security import create_access_token
+from app.schemas.user import (TokenResponse, UserCreate, UserLogin, UserRead)
 from app.services import user_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -16,3 +17,4 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     if existing_username:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already taken")
     return user_service.create_user(db, user_data)
+

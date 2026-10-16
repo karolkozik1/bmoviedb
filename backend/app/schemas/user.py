@@ -18,3 +18,11 @@ class UserRead(BaseModel):
     is_active: bool
     created_at: datetime
     updated_at: datetime
+    
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=8, max_length=255)
+    
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
