@@ -18,3 +18,10 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already taken")
     return user_service.create_user(db, user_data)
 
+@router.post("/login", response_model=TokenResponse)
+def login(login_data: UserLogin, db: Session = Depends(get_db)):
+    user = user_service.authenticate_user(db, login_data.email, login_data.password)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
+    access_token = create_access_token(subject=str(user.id))
+    return TokenResponse(access_token=access_token)
