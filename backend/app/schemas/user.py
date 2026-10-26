@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
@@ -23,6 +24,11 @@ class UserUpdate(BaseModel):
     email: EmailStr | None = None
     username: str | None = Field(default=None, min_length=3, max_length=255)
     password: str | None = Field(default=None, min_length=8, max_length=255)
+
+class UserRole(str, Enum):
+    USER = "user"
+    MODERATOR = "moderator"
+    ADMIN = "admin"
 
 class UserLogin(BaseModel):
     email: EmailStr

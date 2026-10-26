@@ -1,5 +1,7 @@
 import jwt
 
+from collections.abc import Callable
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
@@ -30,3 +32,15 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is inactive")
     
     return user
+
+def require_role (*allowed_roles: str) -> Callable:
+    def dependency(current_user: User = Depends(get_current_user)) -> User:
+        if current_user.role not in allowed_roles:
+            raise HTTPException (status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
+        return current_user
+    return dependency
+
+def require_trusted_user (current_user: User = Depends(get_current_user)) -> User:
+    if current_user.trust_score < 300:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Isufficient trust score")
+    return current_user
