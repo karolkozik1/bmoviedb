@@ -14,6 +14,7 @@ from app.models.person import Person
 from app.models.movie_person import MoviePerson
 from app.models.movie_external_id import MovieExternalId
 from app.models.user import User
+from app.models.rating import Rating
 
 
 
