@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-class RatingBase(BaseModel):
+class RatingCreate(BaseModel):
     rating: int = Field(ge=1, le=10)
 
 class RatingRead(BaseModel):

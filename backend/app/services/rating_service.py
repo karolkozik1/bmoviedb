@@ -23,3 +23,9 @@ def create_or_update_rating(db: Session, user_id: int, movie_id: int, value: int
         return new_rating
 
 
+def get_movie_rating_average(db: Session, movie_id: int) -> tuple[float | None, int]:
+    statement = select(func.avg(Rating.rating), func.count(Rating.rating)).where(Rating.movie_id == movie_id)
+    result = db.scalar(statement).one()
+    average = result[0]
+    count = result[1]
+    return (float(average) if average is not None else None, count)

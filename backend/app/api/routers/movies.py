@@ -2,9 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.api.dependencies.auth import get_current_user
+from app.models.user import User
 from app.schemas.movie import MovieCreate, MovieRead, MovieUpdate
 from app.schemas.person import MoviePersonCreate
+from app.schemas.rating import RatingCreate, RatingRead
 from app.services import movie_service
+from app.services import rating_service
 
 router = APIRouter(prefix="/movies", tags=["movies"])
 
@@ -77,3 +81,13 @@ def remove_person_from_movie(movie_id: int, person_id: int, role: str, db: Sessi
     if not removed:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie person relation not found")
     
+@router.post("/{movie_id}/ratings", response_model=RatingRead, status_code=status.HTTP_201_CREATED)
+def rate_movie(movie_id: int, rating_data: RatingCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    movie = movie_service.get_movie_by_id(db=db, movie_id=movie_id)
+    if not movie:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
+    try:
+        rating = rating_service.create_or_update_rating(db=db, user_id=current_user.id, movie_id=movie_id, value=rating_data.rating)
+        return rating
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
