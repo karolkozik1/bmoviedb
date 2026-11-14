@@ -29,3 +29,9 @@ def get_movie_rating_average(db: Session, movie_id: int) -> tuple[float | None, 
     average = result[0]
     count = result[1]
     return (float(average) if average is not None else None, count)
+
+def delete_user_rating(db: Session, user_id: int, movie_id: int) -> None:
+    rating = get_user_rating(db, user_id, movie_id)
+    if rating:
+        db.delete(rating)
+        db.commit()

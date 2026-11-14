@@ -91,3 +91,28 @@ def rate_movie(movie_id: int, rating_data: RatingCreate, db: Session = Depends(g
         return rating
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+    
+@router.get("/{movie_id}/ratings/summary")
+def get_movie_ratings_summary(movie_id: int, db: Session = Depends(get_db)):
+    movie = movie_service.get_movie_by_id(db=db, movie_id=movie_id)
+    if not movie:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
+    average, count = rating_service.get_movie_rating_average(db=db, movie_id=movie_id)
+    return {"movie_id": movie_id, "average_rating": round(average, 2) if average is not None else None, "rating_count": count}
+
+@router.get("/{movie_id}/ratings/me", response_model=RatingRead | None)
+def get_my_rating(movie_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    movie = movie_service.get_movie_by_id(db=db, movie_id=movie_id)
+    if not movie:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
+    rating = rating_service.get_user_rating(db=db, user_id=current_user.id, movie_id=movie_id)
+    return rating
+@router.delete("/{movie_id}/ratings/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_my_rating(movie_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    movie = movie_service.get_movie_by_id(db=db, movie_id=movie_id)
+    if not movie:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
+    rating = rating_service.get_user_rating(db=db, user_id=current_user.id, movie_id=movie_id)
+    if not rating:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rating not found")
+    rating_service.delete_user_rating(db=db, user_id=current_user.id, movie_id=movie_id)
