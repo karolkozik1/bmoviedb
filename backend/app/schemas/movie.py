@@ -33,6 +33,8 @@ class MovieRead(MovieBase):
     genres: list[GenreRead] = Field(default_factory=list)
     people_roles: list[MoviePersonRead] = Field(default_factory=list)
     external_ids: list[MovieExternalIdRead] = Field(default_factory=list)
+    average_rating: float | None = None
+    rating_count: int = 0
     
     model_config = ConfigDict(from_attributes=True)
     

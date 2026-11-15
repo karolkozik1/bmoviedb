@@ -1,4 +1,4 @@
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.genre import Genre
@@ -7,6 +7,7 @@ from app.models.movie_external_id import MovieExternalId
 from app.schemas.movie import MovieCreate, MovieUpdate
 from app.models.movie_person import MoviePerson
 from app.models.person import Person
+from app.models.rating import Rating
 
 def create_movie(db: Session, movie_create: MovieCreate) -> Movie:
     genre_ids = movie_create.genre_ids or []
@@ -192,3 +193,14 @@ def remove_person_from_movie(db: Session, movie: Movie, person_id: int, role: st
     db.delete(relation)
     db.commit()
     return True
+
+def get_rating_stats_subquery():
+    return (
+        select(
+            Rating.movie_id.label("movie_id"),
+            func.avg(Rating.rating).label("average_rating"),
+            func.count(Rating.id).label("rating_count")
+        )
+        .group_by(Rating.movie_id)
+        .subquery()
+    )
