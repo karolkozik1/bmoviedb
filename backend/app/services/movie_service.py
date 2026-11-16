@@ -44,14 +44,20 @@ def get_movies(db: Session,
                genre_id: int | None = None,
                person_id: int | None = None,
                role: str | None = None,
+               min_rating: float | None = None,
                is_active: bool | None = None,
                skip: int = 0,
                limit: int = 30,
                sort_by: str = "title") -> list[Movie]:
-    statement = select(Movie).options(
-        selectinload(Movie.genres),
-        selectinload(Movie.people_roles).selectinload(MoviePerson.person),
-        selectinload(Movie.external_ids)
+    rating_stats = get_rating_stats_subquery()
+    statement = (
+        select(Movie, rating_stats.c.average_rating, rating_stats.c.rating_count)
+        .outerjoin(rating_stats, Movie.id == rating_stats.c.movie_id)
+        .options(
+            selectinload(Movie.genres),
+            selectinload(Movie.people_roles).selectinload(MoviePerson.person),
+            selectinload(Movie.external_ids),
+        )
     )
     if sort_by == "release_year":
         statement = statement.order_by(Movie.release_year)
@@ -59,6 +65,12 @@ def get_movies(db: Session,
         statement = statement.order_by(Movie.release_date.desc())
     elif sort_by == "oldest":
         statement = statement.order_by(Movie.release_date.asc())
+    elif sort_by == "rating":
+        statement = statement.order_by(rating_stats.c.average_rating.desc().nullslast())
+    elif sort_by == "rating_asc":
+        statement = statement.order_by(rating_stats.c.average_rating.asc().nullslast())
+    elif sort_by == "rating_count":
+        statement = statement.order_by(rating_stats.c.rating_count.desc().nullslast())
     else:
         statement = statement.order_by(Movie.title)
     if title:
@@ -78,7 +90,16 @@ def get_movies(db: Session,
     if is_active is not None:
         statement = statement.where(Movie.is_active == is_active)
     statement = statement.offset(skip).limit(limit)
-    return list(db.scalars(statement).unique().all())
+    if min_rating is not None:
+        statement = statement.where(rating_stats.c.average_rating >= min_rating)
+        
+    rows = db.execute(statement).unique().all()
+    movies = []
+    for movie, average_rating, rating_count in rows:
+        setattr(movie, "average_rating", round(float(average_rating), 2) if average_rating is not None else None)
+        setattr(movie, "rating_count", rating_count if rating_count is not None else 0)
+        movies.append(movie)
+    return movies
 
 def update_movie(db: Session, movie: Movie, movie_update: MovieUpdate) -> Movie:
     update_data = movie_update.model_dump(exclude_unset=True)
@@ -106,12 +127,31 @@ def delete_movie(db: Session, movie: Movie) -> None:
     db.commit()
 
 def get_movie_by_id(db: Session, movie_id: int) -> Movie | None:
-    statement = select(Movie).options(
-        selectinload(Movie.genres),
-        selectinload(Movie.people_roles).selectinload(MoviePerson.person),
-        selectinload(Movie.external_ids)
-    ).where(Movie.id == movie_id)
-    return db.scalars(statement).first()
+    rating_stats = get_rating_stats_subquery()
+    statement = (
+        select(
+            Movie,
+            rating_stats.c.average_rating,
+            rating_stats.c.rating_count,
+        )
+        .outerjoin(rating_stats, rating_stats.c.movie_id == Movie.id)
+        .options(
+            selectinload(Movie.genres),
+            selectinload(Movie.people_roles).selectinload(MoviePerson.person),
+            selectinload(Movie.external_ids),
+        )
+        .where(Movie.id == movie_id)
+    )
+    row = db.scalars(statement).unique().first()
+    
+    if row is None:
+        return None
+    
+    movie, average_rating, rating_count = row
+    setattr(movie, "average_rating", round(float(average_rating), 2) if average_rating is not None else None)
+    setattr(movie, "rating_count", rating_count if rating_count is not None else 0)
+    
+    return movie
 
 def upsert_imported_movie(
     db: Session,
