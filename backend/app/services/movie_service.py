@@ -142,7 +142,7 @@ def get_movie_by_id(db: Session, movie_id: int) -> Movie | None:
         )
         .where(Movie.id == movie_id)
     )
-    row = db.scalars(statement).unique().first()
+    row = db.execute(statement).unique().first()
     
     if row is None:
         return None
