@@ -6,5 +6,6 @@ from app.models.movie_person import MoviePerson
 from app.models.movie_external_id import MovieExternalId
 from app.models.user import User
 from app.models.rating import Rating
+from app.models.review import Review
 
-__all__ = ["Movie", "Genre", "Movie_Genre", "Person", "MoviePerson", "MovieExternalId", "User", "Rating"]
+__all__ = ["Movie", "Genre", "Movie_Genre", "Person", "MoviePerson", "MovieExternalId", "User", "Rating", "Review"]
