@@ -7,8 +7,10 @@ from app.models.user import User
 from app.schemas.movie import MovieCreate, MovieRead, MovieUpdate
 from app.schemas.person import MoviePersonCreate
 from app.schemas.rating import RatingCreate, RatingRead
+from app.schemas.review import ReviewCreate, ReviewRead, ReviewUpdate
 from app.services import movie_service
 from app.services import rating_service
+from app.services import review_service
 
 router = APIRouter(prefix="/movies", tags=["movies"])
 
@@ -108,6 +110,7 @@ def get_my_rating(movie_id: int, db: Session = Depends(get_db), current_user: Us
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
     rating = rating_service.get_user_rating(db=db, user_id=current_user.id, movie_id=movie_id)
     return rating
+
 @router.delete("/{movie_id}/ratings/me", status_code=status.HTTP_204_NO_CONTENT)
 def delete_my_rating(movie_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     movie = movie_service.get_movie_by_id(db=db, movie_id=movie_id)
@@ -117,3 +120,72 @@ def delete_my_rating(movie_id: int, db: Session = Depends(get_db), current_user:
     if not rating:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rating not found")
     rating_service.delete_user_rating(db=db, user_id=current_user.id, movie_id=movie_id)
+
+@router.post("/{movie_id}/reviews", response_model=ReviewRead, status_code=status.HTTP_201_CREATED)
+def create_review(movie_id: int, review_data: ReviewCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    movie = movie_service.get_movie_by_id(db=db, movie_id=movie_id)
+    if not movie:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
+
+    existing_review = review_service.get_review_by_user_and_movie(
+        db=db, user_id=current_user.id, movie_id=movie_id
+    )
+    if existing_review:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User has already submitted a review for this movie")
+
+    rating = rating_service.get_user_rating(db=db, user_id=current_user.id, movie_id=movie_id)
+    if not rating:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User must rate the movie before submitting a review")
+
+    if review_data.rating_id != rating.id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Review rating must match the user's rating for this movie")
+
+    review = review_service.create_review(db=db, user_id=current_user.id, movie_id=movie_id, rating_id=rating.id, content=review_data.content)
+    return review
+
+
+@router.get("/{movie_id}/reviews", response_model=list[ReviewRead])
+def get_reviews(movie_id: int, db: Session = Depends(get_db)):
+    movie = movie_service.get_movie_by_id(db=db, movie_id=movie_id)
+    if not movie:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
+
+    reviews = review_service.get_review_for_movie(db=db, movie_id=movie_id)
+    return reviews
+
+
+@router.get("/{movie_id}/reviews/me", response_model=ReviewRead | None)
+def get_my_review(movie_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    movie = movie_service.get_movie_by_id(db=db, movie_id=movie_id)
+    if not movie:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
+
+    review = review_service.get_review_by_user_and_movie(db=db, user_id=current_user.id, movie_id=movie_id)
+    return review
+
+
+@router.patch("/{movie_id}/reviews/me", response_model=ReviewRead)
+def update_my_review(movie_id: int, review_data: ReviewUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    movie = movie_service.get_movie_by_id(db=db, movie_id=movie_id)
+    if not movie:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
+
+    review = review_service.get_review_by_user_and_movie(db=db, user_id=current_user.id, movie_id=movie_id)
+    if not review:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review not found")
+
+    updated_review = review_service.update_review(db=db, review=review, content=review_data.content)
+    return updated_review
+
+
+@router.delete("/{movie_id}/reviews/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_my_review(movie_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    movie = movie_service.get_movie_by_id(db=db, movie_id=movie_id)
+    if not movie:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
+
+    review = review_service.get_review_by_user_and_movie(db=db, user_id=current_user.id, movie_id=movie_id)
+    if not review:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review not found")
+
+    review_service.delete_review(db=db, review=review)
