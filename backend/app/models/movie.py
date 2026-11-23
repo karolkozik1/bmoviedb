@@ -1,9 +1,14 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.watchlist import Watchlist
+
 
 class Movie(Base):
     __tablename__ = "movies"
@@ -23,4 +28,5 @@ class Movie(Base):
     external_ids = relationship("MovieExternalId", back_populates="movie", cascade="all, delete-orphan")
     ratings = relationship("Rating", back_populates="movie", cascade="all, delete-orphan")
     reviews = relationship("Review", back_populates="movie", cascade="all, delete-orphan")
+    watchlist_entries: Mapped[list["Watchlist"]] = relationship("Watchlist", back_populates="movie", cascade="all, delete-orphan")
     is_active: Mapped[bool] = mapped_column(nullable=False, default=True)
