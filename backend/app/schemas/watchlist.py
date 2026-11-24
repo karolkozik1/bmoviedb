@@ -12,6 +12,13 @@ class WatchlistRead(BaseModel):
     
     model_config = ConfigDict(from_attributes=True)
 
+class WatchlistMovieRead(BaseModel):
+    id: int
+    title: str
+    original_title: str
+    release_date: datetime | None
+    model_config = ConfigDict(from_attributes=True)
+
 class WatchlistItemRead(WatchlistRead):
     id: int
     created_at: datetime

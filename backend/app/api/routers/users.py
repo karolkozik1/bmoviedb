@@ -5,7 +5,7 @@ from app.db.session import get_db
 from app.api.dependencies.auth import get_current_user
 from app.models.user import User
 from app.schemas.user import UserRead, UserUpdate
-from app.schemas.watchlist import WatchlistItemRead, WatchlistRead
+from app.schemas.watchlist import WatchlistItemRead
 from app.services import user_service, movie_service, watchlist_service
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -37,7 +37,7 @@ def add_to_watchlist(movie_id: int, db: Session = Depends(get_db), current_user:
     watchlist_entry = watchlist_service.add_to_watchlist(db, current_user.id, movie_id)
     return watchlist_entry
 
-@router.get("/me/watchlist", response_model=WatchlistRead)
+@router.get("/me/watchlist", response_model=list[WatchlistItemRead])
 def get_watchlist(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     watchlist_entries = watchlist_service.get_user_watchlist(db, current_user.id)
     return watchlist_entries
