@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Integer, String, Text
@@ -17,12 +17,15 @@ class Movie(Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     original_title: Mapped[str] = mapped_column(String(255), nullable=True)
     release_year: Mapped[int] = mapped_column(Integer, nullable=True)
-    release_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    release_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=True)
     duration_minutes: Mapped[int] = mapped_column(Integer, nullable=True)
     rating: Mapped[float] = mapped_column(nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc), nullable=False)
     people_roles = relationship("MoviePerson", back_populates="movie", cascade="all, delete-orphan")
     genres = relationship("Genre", secondary="movie_genres", back_populates="movies")
     external_ids = relationship("MovieExternalId", back_populates="movie", cascade="all, delete-orphan")

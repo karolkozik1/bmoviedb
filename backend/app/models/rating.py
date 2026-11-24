@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, Integer, UniqueConstraint
@@ -20,7 +20,8 @@ class Rating(Base):
     movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id", ondelete="CASCADE"), nullable=False)
     rating: Mapped[int] = mapped_column(Integer, nullable=False)
     review: Mapped["Review | None"] = relationship("Review", back_populates="rating", uselist=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),nullable=False)
 
     user: Mapped["User"] = relationship("User", back_populates="ratings")
     movie: Mapped["Movie"] = relationship("Movie", back_populates="ratings")
