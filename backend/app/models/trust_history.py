@@ -17,7 +17,4 @@ class TrustHistory(Base):
     score_after: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), 
     default=lambda: datetime.now(timezone.utc), nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
-    default=lambda: datetime.now(timezone.utc),
-    onupdate=lambda: datetime.now(timezone.utc), nullable=False)
     user = relationship("User", back_populates="trust_history")
