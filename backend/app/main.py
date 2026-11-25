@@ -1,6 +1,8 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
+from app.core.config import settings
 from app.db.session import engine
 from app.api.routers.movies import router as movies_router
 from app.api.routers.genres import router as genres_router
@@ -12,6 +14,13 @@ app = FastAPI(
     title="BmovieDb API",
     description="Backend API for BmovieDb",
     version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings.frontend_origin, "http://127.0.0.1:3000"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(movies_router)
