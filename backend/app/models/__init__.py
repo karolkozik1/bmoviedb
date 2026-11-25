@@ -8,5 +8,6 @@ from app.models.user import User
 from app.models.rating import Rating
 from app.models.review import Review
 from app.models.watchlist import Watchlist
+from app.models.trust_history import TrustHistory
 
-__all__ = ["Movie", "Genre", "Movie_Genre", "Person", "MoviePerson", "MovieExternalId", "User", "Rating", "Review", "Watchlist"]
+__all__ = ["Movie", "Genre", "Movie_Genre", "Person", "MoviePerson", "MovieExternalId", "User", "Rating", "Review", "Watchlist", "TrustHistory"]

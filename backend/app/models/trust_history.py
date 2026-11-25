@@ -7,7 +7,7 @@ from app.db.base import Base
 
 class TrustHistory(Base):
     __tablename__ = "trust_history"
-    __table_args__ = (UniqueConstraint("user_id", "event_type", "source_id", name="uq_trust_history_user_movie"),)
+    __table_args__ = (UniqueConstraint("user_id", "event_type", "source_id", name="uq_trust_history_event_score"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)

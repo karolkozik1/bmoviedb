@@ -28,3 +28,4 @@ class User(Base):
     ratings = relationship("Rating", back_populates="user", cascade="all, delete-orphan")
     reviews = relationship("Review", back_populates="user", cascade="all, delete-orphan")
     watchlist: Mapped[list["Watchlist"]] = relationship("Watchlist", back_populates="user", cascade="all, delete-orphan")
+    trust_history = relationship("TrustHistory", back_populates="user", cascade="all, delete-orphan")
