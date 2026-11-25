@@ -417,7 +417,7 @@ export default function MovieBrowser({
             <button className="modal-close" aria-label="Close" onClick={() => setSelectedMovie(null)}><Icon name="close" /></button>
             <div className="detail-cover" style={{ backgroundImage: `url("${movieArtworkUrl(selectedMovie.id)}")` }} />
             <div className="detail-content">
-              <div className="detail-overline">{selectedMovie.release_year ?? "A BmovieDb pick"} <span>·</span> {selectedMovie.duration_minutes ? `${selectedMovie.duration_minutes} min` : "Feature film"}</div>
+              <div className="detail-overline">{selectedMovie.release_year ?? "A BMovieDb pick"} <span>·</span> {selectedMovie.duration_minutes ? `${selectedMovie.duration_minutes} min` : "Feature film"}</div>
               <h2 id="detail-title">{selectedMovie.title}</h2>
               <div className="detail-genres">{selectedMovie.genres.map((genre) => <span key={genre.id}>{genre.name}</span>)}</div>
               <p className="detail-description">{selectedMovie.description || "A story waiting to be discovered. Add this film to your watchlist, leave a rating, and share what you thought with the community."}</p>

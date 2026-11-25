@@ -33,9 +33,9 @@ const oxanium = Oxanium({
 });
 
 export const metadata: Metadata = {
-  title: "BmovieDb — Find your next favorite film",
+  title: "BMovieDb — Find your next favorite film",
   description:
-    "Discover, rate, and save films with BmovieDb, a home for people who stay for the credits.",
+    "Discover, rate, and save films with BMovieDb, a home for people who stay for the credits.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
