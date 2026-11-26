@@ -6,7 +6,8 @@ from app.api.dependencies.auth import get_current_user
 from app.models.user import User
 from app.schemas.user import UserRead, UserUpdate
 from app.schemas.watchlist import WatchlistItemRead
-from app.services import user_service, movie_service, watchlist_service
+from app.schemas.trust import TrustHistoryRead, TrustSummaryRead
+from app.services import user_service, movie_service, watchlist_service, trust_service
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -50,3 +51,11 @@ def remove_from_watchlist(movie_id: int, db: Session = Depends(get_db), current_
     
     watchlist_service.remove_from_watchlist(db, watchlist_entry)
     return None
+
+@router.get("/me/trust/", response_model=TrustSummaryRead)
+def get_my_trust(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return trust_service.get_user_trust_summary(current_user)
+
+@router.get("/me/trust/history", response_model=list[TrustHistoryRead])
+def get_my_trust_history(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return trust_service.get_trust_history(db=db, user_id=current_user.id)
