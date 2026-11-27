@@ -7,6 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2Pas
 from sqlalchemy.orm import Session
 
 from app.core.security import decode_access_token
+from app.core.trust import TRUSTED_USER_THRESHOLD
 from app.db.session import get_db
 from app.models.user import User
 
@@ -41,6 +42,8 @@ def require_role (*allowed_roles: str) -> Callable:
     return dependency
 
 def require_trusted_user (current_user: User = Depends(get_current_user)) -> User:
-    if current_user.trust_score < 300:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Isufficient trust score")
+    if current_user.role in ("admin", "moderator"):
+        return current_user
+    if current_user.trust_score < TRUSTED_USER_THRESHOLD:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=("Insufficient trust score.", "At least 300 trust points required."))
     return current_user
